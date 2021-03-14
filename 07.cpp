@@ -15,7 +15,7 @@ int resolver_rec(const string & p1, const string & p2, int i, int j, Matriz<int>
     if (res != -1) return res; //El valor ya se ha calculado (inicializacion a 0)
 
     //Caso recursivo, si diferentes entonces busca el maximo
-    if(p1[i] == p2[j]) res = resolver_rec(p1, p2, i-1, j-1, tabla) + 1;
+    if(p1[i-1] == p2[j-1]) res = resolver_rec(p1, p2, i-1, j-1, tabla) + 1;
     else res = max(resolver_rec(p1, p2, i-1, j, tabla), resolver_rec(p1, p2, i, j-1, tabla));
     return res;
 }
@@ -25,26 +25,20 @@ int resolver_rec(const string & p1, const string & p2, int i, int j, Matriz<int>
 //nuevo es el nuevo caracter (vacio o una letra si p1[i] == p2[j])
 //recursion contiene el string que vamos acarreando
 string reconstruir(const string & p1, const string & p2, int i, int j, const Matriz<int> & tabla) {
-    if(i < 0 || j < 0) return "";
+    if(i == 0 || j == 0) return "";
 
     string nuevo = "";
     string recursion;
 
-    if (p1[i] == p2[j]) {
-        nuevo = p1[i];
-        recursion =  reconstruir(p1, p2, i-1, j-1, tabla);
+    if (p1[i-1] == p2[j-1]) {
+        recursion = reconstruir(p1, p2, i - 1, j - 1, tabla);
+        recursion.push_back(p1[i-1]); //metemos el nuevo elemento
     }
     else {
-        if (i == 0) recursion = reconstruir(p1, p2, i, j-1, tabla);
-        else if(j == 0) recursion = reconstruir(p1, p2, i - 1, j, tabla);
-        else{
-            if (max(tabla[i - 1][j], tabla[i][j - 1]) == tabla[i - 1][j])
-                recursion = reconstruir(p1, p2, i - 1, j, tabla);
-            else recursion = reconstruir(p1, p2, i, j - 1, tabla);
-        }
-
+        if (tabla[i][j] == tabla[i - 1][j]) recursion = reconstruir(p1, p2, i - 1, j, tabla);
+        else recursion = reconstruir(p1, p2, i, j - 1, tabla);
     }
-    return recursion + nuevo;
+    return recursion;
 }
 
 string resolver(const string & p1, const string & p2) {
@@ -58,7 +52,7 @@ string resolver(const string & p1, const string & p2) {
         tabla[0][j] = 0;
 
     resolver_rec(p1, p2, p1.length(), p2.length(), tabla);
-    return reconstruir(p1, p2, p1.length()-1, p2.length()-1, tabla);
+    return reconstruir(p1, p2, p1.length(), p2.length(), tabla);
 }
 
 bool resuelveCaso() {
@@ -73,17 +67,17 @@ bool resuelveCaso() {
 }
 
 int main() {
-    #ifndef DOMJUDGE
+#ifndef DOMJUDGE
     ifstream in("casos.txt");
     auto cinbuf = cin.rdbuf(in.rdbuf());
-    #endif
+#endif
 
     while (resuelveCaso());
 
-    #ifndef DOMJUDGE
+#ifndef DOMJUDGE
     cin.rdbuf(cinbuf);
     system("PAUSE");
-    #endif
+#endif
 
     return 0;
 }
