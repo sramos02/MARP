@@ -4,6 +4,8 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+
+#include "Matriz.h"
 using namespace std;
 
 typedef struct{
@@ -11,67 +13,49 @@ typedef struct{
     int valor;
 }Cofre;
 
-typedef struct{
-    int numSoluciones;
-    int maxOro;
-    int numObjetos;
-    vector<Cofre> cofres;
-}Solucion;
+void reconstruir(vector<Cofre> & ret, const Matriz<int> & tabla, int t, int n, int i, int j, const Cofre valores[]) {
+    if(i != 0) {
+        int remTime = (3 * valores[i - 1].prof);
 
+        if (remTime < j && tabla[i - 1][j] < (tabla[i - 1][j - remTime]) + valores[i - 1].valor) {
+            reconstruir(ret, tabla, t, n, i - 1, j - remTime, valores);
+            ret.push_back(valores[i - 1]);
+        } else {
+            reconstruir(ret, tabla, t, n, i - 1, j, valores);
+        }
+    }
+}
 
-Solucion resolver(int t, int n, const Cofre valores[]) {
-    Solucion tabla[n + 1][t + 1];
-    Solucion ret;
+int resolver(Matriz<int> & tabla, int t, int n, const Cofre valores[]) {
+    int remTime;
+    int aux1, aux2;
 
     //Caso base
-    for (int j = 0; j <= t; j++) {
-        tabla[0][j].numSoluciones = 0;
-        tabla[0][j].maxOro = 0;
-        tabla[0][j].numObjetos = 0;
-    }
+    for (int j = 0; j <= t; j++)
+        tabla[0][j] = 0;
 
-    for (int i = 0; i <= n; i++) {
-        tabla[i][0].numSoluciones = 1;
-        tabla[i][0].maxOro = 0;
-        tabla[i][0].numObjetos = 0;
-    }
+    for (int i = 0; i <= n; i++)
+        tabla[i][0] = 0;
 
 
     for (int i = 1; i <= n; i++) {
-        int prof = (3 * valores[i - 1].prof); //Tiempo que tardará en bajar
+        remTime = (3 * valores[i - 1].prof);
         for (int j = 1; j <= t; j++) {
-
-            if (prof > j) //Si tardo demasiado en ir mejor no lo cojo
-                tabla[i][j] = tabla[i - 1][j];
+            if (remTime > j)
+                tabla[i][j] = tabla[i - 1][j]; //Si tardo demasiado en ir mejor no lo cojo
             else {
-                int aux1 = tabla[i - 1][j].numSoluciones;
-                int aux2 = tabla[i - 1][j - prof].numSoluciones;
-                tabla[i][j].numSoluciones = aux1 + aux2;
+                aux1 = tabla[i - 1][j];
+                aux2 = tabla[i - 1][j - remTime];
 
-                //Por defecto no cojo el camino
-                tabla[i][j].maxOro = tabla[i - 1][j].maxOro;
-                tabla[i][j].numObjetos = tabla[i - 1][j].numObjetos;
-                tabla[i][j].cofres = tabla[i - 1][j].cofres;
-
-
-                if (aux1 != 0 && aux2 != 0) { //Si tenemos las dos posibilidaddes buscamos la mejor
-                    if (tabla[i - 1][j - prof].maxOro > tabla[i - 1][j].maxOro) {
-                        tabla[i][j].numObjetos = tabla[i - 1][j - prof].numObjetos + 1;
-                        tabla[i][j].maxOro = tabla[i - 1][j - prof].maxOro + valores[i - 1].valor;
-                        tabla[i][j].cofres = tabla[i - 1][j - prof].cofres;
-                        tabla[i][j].cofres.push_back(valores[i - 1]);
-                    }
-                } else if (aux2 != 0) {
-                    tabla[i][j].numObjetos = tabla[i - 1][j - prof].numObjetos + 1;
-                    tabla[i][j].maxOro = tabla[i - 1][j - prof].maxOro + valores[i - 1].valor;
-                    tabla[i][j].cofres = tabla[i - 1][j - prof].cofres;
-                    tabla[i][j].cofres.push_back(valores[i - 1]);
+                if(aux1 > (aux2 + valores[i-1].valor)) tabla[i][j] = aux1;
+                else{
+                    tabla[i][j] = aux2;
+                    tabla[i][j] += valores[i-1].valor;
                 }
-                ret = tabla[i][j];
             }
         }
     }
-    return ret;
+    return tabla[n][t];
 }
 
 bool resuelveCaso() {
@@ -83,30 +67,33 @@ bool resuelveCaso() {
     for (int i = 0; i < n; i++) {
         cin >> valores[i].prof;
         cin >> valores[i].valor;
+
     }
 
-    Solucion ret = resolver(t, n, valores);
+    vector<Cofre> ret;
+    Matriz<int> tabla(n+1, t+1, 0);
+    int maxOro = resolver(tabla, t, n, valores);
+    reconstruir(ret, tabla, t, n, n, t, valores);
 
-    cout << ret.maxOro << endl << ret.numObjetos << endl;
-    if (ret.cofres.size() > 0)
-        for (int i = 0; i < ret.cofres.size(); i++)
-            cout << ret.cofres[i].prof << " " << ret.cofres[i].valor << "\n";
+    cout << maxOro << endl << ret.size() << endl;
+    for (int i = 0; i < ret.size(); i++)
+        cout << ret[i].prof << " " << ret[i].valor << "\n";
     cout << "---" << endl;
     return true;
 }
 
 int main() {
-    #ifndef DOMJUDGE
+#ifndef DOMJUDGE
     ifstream in("casos.txt");
     auto cinbuf = cin.rdbuf(in.rdbuf());
-    #endif
+#endif
 
     while (resuelveCaso());
 
-    #ifndef DOMJUDGE
+#ifndef DOMJUDGE
     cin.rdbuf(cinbuf);
     system("PAUSE");
-    #endif
+#endif
 
     return 0;
 }
