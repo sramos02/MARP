@@ -17,7 +17,7 @@ void reconstruir(vector<Cofre> & ret, const Matriz<int> & tabla, int t, int n, i
     if(i != 0) {
         int remTime = (3 * valores[i - 1].prof);
 
-        if (remTime < j && tabla[i - 1][j] < (tabla[i - 1][j - remTime]) + valores[i - 1].valor) {
+        if (remTime <= j && tabla[i - 1][j] < (tabla[i - 1][j - remTime]) + valores[i - 1].valor) {
             reconstruir(ret, tabla, t, n, i - 1, j - remTime, valores);
             ret.push_back(valores[i - 1]);
         } else {
@@ -55,6 +55,7 @@ int resolver(Matriz<int> & tabla, int t, int n, const Cofre valores[]) {
             }
         }
     }
+
     return tabla[n][t];
 }
 
