@@ -11,46 +11,49 @@ using namespace std;
 //Pero no se cuando elegir. He pensado en crear dos caminos, izq y der
 
 //Elegir el que tenga la menor longitud. Esto es rentable?
-string resolver_rec_4(int i, int j, int n, string palabra, Matriz<string> tabla) {
-    string & res = tabla[i][j];
-
-    char p1 = palabra[j];
-    char p2 = palabra[n - i];
-
-    //El valor ya se ha calculado
-    if (res != "") return res;
+int resolver_rec(const int i, const int j, const string palabra, Matriz<int> & tabla) {
+    int & res = tabla[i][j];
+    char p1 = palabra[i], p2 = palabra[j];
 
     //Caso base
-    if(i == n && j == n) {
-        res.push_back(p1);
+    if(i == j) return res;
+
+    //Caso recursivo
+    if (p1 == p2) res = resolver_rec(i + 1, j - 1, palabra, tabla);
+    else res = min(resolver_rec(i, j - 1, palabra, tabla), resolver_rec(i + 1, j, palabra, tabla)) + 1;
+
+    return res;
+}
+
+string reconstruir(int i, int j, const string palabra, Matriz<int> const & tabla){
+    string res;
+
+    //Caso base
+    if (i == j) {
+        res = palabra[i];
         return res;
     }
 
     //Caso recursivo
-    if (i == n) { //Te has quedado sin letras con las que comparar
-        res = resolver_rec_4(i, j+1, n, palabra, tabla);
-        res.push_back(p1);
+    if (palabra[i] == palabra[j]) {
+        res.push_back(palabra[i]);
+        reconstruir(i+1, j-1, palabra, tabla);
     }
-    else{
-        if(p1 == p2) { //Las letras son iguales
-            res = resolver_rec_4(i + 1, j + 1, n, palabra, tabla);
-            res.push_back(p2);
-        } else { //Letras diferentes
-            res = resolver_rec_4(i + 1, j, n, palabra, tabla);
-            res.push_back(p2);
+    else {
+        string res1 = reconstruir(i + 1, j, palabra, tabla);
+        string res2 = reconstruir(i, j - 1, palabra, tabla);
+
+        if(res1.length() < res2.length()){
+            res = res1;
+            res.push_back(palabra[i]);
+        }
+        else {
+            res = res2;
+            res.push_back(palabra[j]);
         }
     }
+
     return res;
-}
-
-string resolver(string palabra) {
-    int n = palabra.length();
-    Matriz<string> tabla(n,n,"");
-
-    //return resolver_rec(0,0, n-1, palabra, tabla);
-    //return resolver_rec_2(0,0, n-1, palabra, tabla);
-    //return resolver_rec_3(0,0, 1, n-1, palabra, tabla);
-    return resolver_rec_4(0,0, n-1, palabra, tabla);
 }
 
 bool resuelveCaso() {
@@ -59,7 +62,11 @@ bool resuelveCaso() {
     cin >> p;
     if (!cin) return false;
 
-    cout <<  resolver(p) << endl;
+    int n = p.length();
+    Matriz<int> tabla(n,n,0);
+
+    cout << resolver_rec(0,n-1, p, tabla) << " ";
+    cout << reconstruir(0, n-1, p, tabla) << endl;
     return true;
 }
 
@@ -81,115 +88,33 @@ int main() {
 
 
 
-/*string resolver_rec_3(int i, int j, int camino, int n, string palabra, Matriz<string> tabla) {
-    string & res = tabla[i][j];
+/*
+ * void solve_2(const int i, const int j, const string palabra, string & nueva) {
+    string p1, p2, res1, res2;
 
-    char p1 = palabra[j];
-    char p2 = palabra[n - i];
+    //Para hacer un insert debe ser string
+    p1.push_back(palabra[i]);
+    p2.push_back(palabra[j]);
 
-    //El valor ya se ha calculado
-    if (res != "") return res;
+    if(i == j) nueva = palabra;
+    else{
+        if (p1 == p2) {
+            resolver_rec(i + 1, j - 1, palabra, nueva);
+        }
+        else {
 
+            resolver_rec(i, j - 1, palabra, res1);
+            resolver_rec(i + 1, j, palabra, res2);
 
-    //Caso base
-    if(i == n && j == n) {
-        if(camino == 1) res.push_back(p1);
-        else res.push_back(p2);
-        return res;
-    }
-
-    //Caso recursivo
-    if (camino == 1 && j == n) { //Te has quedado sin letras con las que comparar
-        res = resolver_rec_3(i, j + 1, camino, n, palabra, tabla);
-        res.push_back(p1);
-    }
-    else if (camino == 2 && i == n){
-           res = resolver_rec_3(i+1, j, camino, n, palabra, tabla);
-           res.push_back(p2);
-    }
-    else {
-        if (p1 == p2) { //Las letras son iguales
-            res = resolver_rec_3(i + 1, j + 1, camino, n, palabra, tabla);
-            if (camino == 1) res.push_back(p2);
-            else res.push_back(p1);
-        } else { //Letras diferentes
-            string res1 = resolver_rec_3(i + 1, j, 1, n, palabra, tabla);
-            string res2 = resolver_rec_3(i, j + 1, 2, n, palabra, tabla);
-            if (res1.length() <= res2.length()) {
-                res = res1;
-                res.push_back(p2);
-            } else {
-                res = res2;
-                res.push_back(p1);
+            if (res1.length() <= res2.length()){
+                nueva = res1;
+                nueva.insert(i, p2);
+            }
+            else {
+                nueva = res2;
+                nueva.insert(j, p1);
             }
         }
     }
-    return res;
 }
-
-string resolver_rec_2(int i, int j, int n, string palabra, Matriz<string> tabla) {
-    string & res = tabla[i][j];
-    char p1 = palabra[j];
-    char p2 = palabra[n - i];
-
-    //El valor ya se ha calculado
-    if (res != "") return res;
-
-
-    //Caso base
-    if(i == n && j == n) {
-        res.push_back(p1);
-        return res;
-    }
-
-    //Caso recursivo
-    if (i == n) { //Te has quedado sin letras con las que comparar
-        res = resolver_rec_2(i, j+1, n, palabra, tabla);
-        res.push_back(p1);
-    }
-    else{
-        if(p1 == p2) { //Las letras son iguales
-            res = resolver_rec_2(i+1, j+1, n, palabra, tabla);
-            res.push_back(p2);
-        }
-        else { //Letras diferentes
-            res = resolver_rec_2(i + 1, j, n, palabra, tabla);
-            res.push_back(p2);
-        }
-    }
-    return res;
-}
-
-string resolver_rec(int i, int j, int n, string palabra, Matriz<string> tabla) {
-    string & res = tabla[i][j];
-    char p1 = palabra[j];
-    char p2 = palabra[n - i];
-
-    //El valor ya se ha calculado
-    if (res != "") return res;
-
-
-    //Caso base
-    if(i == n && j == n) {
-        res.push_back(p2);
-        return res;
-    }
-
-    //Caso recursivo
-    if (j == n) { //Te has quedado sin letras con las que comparar
-        res = resolver_rec(i+1, j, n, palabra, tabla);
-        res.push_back(p2);
-    }
-    else{
-        if(p1 == p2) { //Las letras son iguales
-                res = resolver_rec(i+1, j+1, n, palabra, tabla);
-                res.push_back(p1);
-        }
-        else { //Letras diferentes
-            res = resolver_rec(i, j + 1, n, palabra, tabla);
-            res.push_back(p1);
-        }
-    }
-    return res;
-}
-*/
+ * */
