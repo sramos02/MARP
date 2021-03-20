@@ -26,31 +26,24 @@ int resolver_rec(const int i, const int j, const string palabra, Matriz<int> & t
 }
 
 string reconstruir(int i, int j, const string palabra, Matriz<int> const & tabla){
-    string res;
+    string res, aux;
 
     //Caso base
-    if (i == j) {
-        res = palabra[i];
-        return res;
-    }
+    if(i == j) return palabra;
 
     //Caso recursivo
     if (palabra[i] == palabra[j]) {
-        res.push_back(palabra[i]);
-        reconstruir(i+1, j-1, palabra, tabla);
+        res += reconstruir(i+1, j-1, palabra, tabla);
+    }
+    else if(tabla[i][j-1] < tabla[i+1][j]) {
+        res += reconstruir(i, j - 1, palabra, tabla);
+        aux.push_back(palabra[j]);
+        res.insert(i, aux);
     }
     else {
-        string res1 = reconstruir(i + 1, j, palabra, tabla);
-        string res2 = reconstruir(i, j - 1, palabra, tabla);
-
-        if(res1.length() < res2.length()){
-            res = res1;
-            res.push_back(palabra[i]);
-        }
-        else {
-            res = res2;
-            res.push_back(palabra[j]);
-        }
+        res += reconstruir(i + 1, j, palabra, tabla);
+        aux.push_back(palabra[i]);
+        res.insert(j+1+(tabla[i][j]-1), aux); //Esto hace que las nuevas cadenas entren en orden, sino las invierte
     }
 
     return res;
@@ -63,9 +56,9 @@ bool resuelveCaso() {
     if (!cin) return false;
 
     int n = p.length();
-    Matriz<int> tabla(n,n,0);
+    Matriz<int> tabla(n, n, 0);
 
-    cout << resolver_rec(0,n-1, p, tabla) << " ";
+    cout << resolver_rec(0, n-1, p, tabla) << " ";
     cout << reconstruir(0, n-1, p, tabla) << endl;
     return true;
 }
@@ -85,36 +78,3 @@ int main() {
 
     return 0;
 }
-
-
-
-/*
- * void solve_2(const int i, const int j, const string palabra, string & nueva) {
-    string p1, p2, res1, res2;
-
-    //Para hacer un insert debe ser string
-    p1.push_back(palabra[i]);
-    p2.push_back(palabra[j]);
-
-    if(i == j) nueva = palabra;
-    else{
-        if (p1 == p2) {
-            resolver_rec(i + 1, j - 1, palabra, nueva);
-        }
-        else {
-
-            resolver_rec(i, j - 1, palabra, res1);
-            resolver_rec(i + 1, j, palabra, res2);
-
-            if (res1.length() <= res2.length()){
-                nueva = res1;
-                nueva.insert(i, p2);
-            }
-            else {
-                nueva = res2;
-                nueva.insert(j, p1);
-            }
-        }
-    }
-}
- * */
