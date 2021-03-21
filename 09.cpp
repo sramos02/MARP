@@ -7,38 +7,41 @@
 #include "Matriz.h"
 using namespace std;
 
-void cortesRecursivos(int i, int j, int cortes[], Matriz<EntInf> & tabla){
-    int n = tabla.numcols() - 1;
+EntInf buscaCortes(vector<int> const& cortes){
+    int n = cortes.size() - 1;
 
-    //Matriz<int> matrices(n+1,n+1,0), P = Matriz<int>(n+1,n+1,0);
-    for (int d = 1; d <= n-1; ++d){// recorre diagonales
-        for (int i = 1; i <= n - d; ++i) { // recorre elementos de diagonal
+    Matriz<EntInf> matrices(n+1,n+1,0);
+
+    for (int d = 1; d < n; ++d){// recorre diagonales
+        for (int i = 1; i < (n - d + 1); ++i) { // recorre elementos de diagonal
             int j = i + d;
-            tabla[i][j] = Infinito;
-            for (int k = i; k <= j-1; ++k) {
-                
+            matrices[i][j] = Infinito;
+
+            //Busca la mínima k de entre todas las posibles
+            for (int k = i; k < j; ++k) {
+                EntInf esfuerzo = (matrices[i][k] + matrices[k+1][j] + (2*cortes[k])); //(cortes[i-1] * cortes[k] * cortes[j]);
+                if (esfuerzo < matrices[i][j]) matrices[i][j] = esfuerzo;
             }
         }
     }
-
+    return matrices[1][n];
 }
 
-int losTablones(int n, int l, int cortes[]){
-    Matriz<EntInf> tabla(n,n,0);
-    cortesRecursivos(1, n, cortes, tabla);
-}
 
 bool resuelveCaso() {
     int l, n;
-    int cortes[500];
+    vector<int> cortes;
 
     cin >> l >> n;
-    if (!cin) return false;
+    if (l == 0 && n == 0) return false;
+
     for (int i = 0; i < n; i++) {
-        cin >> cortes[i];
+        int aux; cin >> aux;
+        cortes.push_back(aux);
     }
 
-    int ret = losTablones(n, l, cortes);
+    EntInf ret = buscaCortes(cortes);
+
     (ret == 0)? cout << "DESCONECTADA":cout << ret;
     cout << endl;
     return true;
