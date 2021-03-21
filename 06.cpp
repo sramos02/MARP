@@ -16,7 +16,7 @@ int resolver_rec(const int i, const int j, const string palabra, Matriz<int> & t
     char p1 = palabra[i], p2 = palabra[j];
 
     //Caso base
-    if(i == j) return res;
+    if(i >= j) return res;
 
     //Caso recursivo
     if (p1 == p2) res = resolver_rec(i + 1, j - 1, palabra, tabla);
@@ -29,7 +29,7 @@ string reconstruir(int i, int j, const string palabra, Matriz<int> const & tabla
     string res, aux;
 
     //Caso base
-    if(i == j) return palabra;
+    if(i >= j) return palabra;
 
     //Caso recursivo
     if (palabra[i] == palabra[j]) {
