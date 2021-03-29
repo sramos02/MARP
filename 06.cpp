@@ -7,25 +7,20 @@
 #include "Matriz.h"
 using namespace std;
 
-//Es obvio que se tiene que quedar con la más corta. Izquierda o derecha
-//Pero no se cuando elegir. He pensado en crear dos caminos, izq y der
 
-//Elegir el que tenga la menor longitud. Esto es rentable?
 int resolver_rec(const int i, const int j, const string palabra, Matriz<int> & tabla) {
     int & res = tabla[i][j];
 
-    //Caso base
-    if(i >= j) return res;
-
-    //Caso recursivo
-    if (palabra[i] == palabra[j])
-        res = resolver_rec(i + 1, j - 1, palabra, tabla);
-    else
-        res = min(resolver_rec(i, j - 1, palabra, tabla), resolver_rec(i + 1, j, palabra, tabla)) + 1;
-
+    if(i < j) {
+        if (palabra[i] == palabra[j]) //Las letras coinciden
+            res = resolver_rec(i + 1, j - 1, palabra, tabla);
+        else
+            res = min(resolver_rec(i, j - 1, palabra, tabla), resolver_rec(i + 1, j, palabra, tabla)) + 1;
+    }
     return res;
 }
 
+//Prácticamente igual que la construcción
 string reconstruir(int i, int j, const string palabra, Matriz<int> const & tabla){
     string res, aux;
 
