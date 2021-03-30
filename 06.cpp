@@ -8,11 +8,13 @@
 using namespace std;
 
 
-int resolver_rec(const int i, const int j, const string palabra, Matriz<int> & tabla) {
+//Si las letras coinciden nos movemos en diagonal (siguientes 2 letras)
+//Si no conciden nos quedamos con el mejor camino (Izq o Drc)
+int resolver_rec(int i, int j, string const& palabra, Matriz<int> & tabla) {
     int & res = tabla[i][j];
 
     if(i < j) {
-        if (palabra[i] == palabra[j]) //Las letras coinciden
+        if (palabra[i] == palabra[j])
             res = resolver_rec(i + 1, j - 1, palabra, tabla);
         else
             res = min(resolver_rec(i, j - 1, palabra, tabla), resolver_rec(i + 1, j, palabra, tabla)) + 1;
@@ -20,26 +22,25 @@ int resolver_rec(const int i, const int j, const string palabra, Matriz<int> & t
     return res;
 }
 
-//Prácticamente igual que la construcción
-string reconstruir(int i, int j, const string palabra, Matriz<int> const & tabla){
-    string res, aux;
+//Cuando los iteradores se cruzan se crea la palabra entera y por recursión
+//va introduciendo los nuevos caracteres donde toque
+string reconstruir(int i, int j, string const& palabra, Matriz<int> const& tabla){
+    string res;
 
     //Caso base
-    if(i >= j) return palabra;
-
-    //Caso recursivo
-    if (palabra[i] == palabra[j]) {
-        res = reconstruir(i+1, j-1, palabra, tabla);
-    }
-    else if(tabla[i][j-1] < tabla[i+1][j]) {
-        res = reconstruir(i, j - 1, palabra, tabla);
-        aux.push_back(palabra[j]);
-        res.insert(i, aux);
-    }
+    if(i >= j) res = palabra;
     else {
-        res = reconstruir(i + 1, j, palabra, tabla);
-        aux.push_back(palabra[i]);
-        res.insert(j+1+(tabla[i][j]-1), aux); //Esto hace que las nuevas cadenas entren en orden, sino las invierte
+        if (palabra[i] == palabra[j]) {
+            res = reconstruir(i + 1, j - 1, palabra, tabla);
+        } else if (tabla[i][j - 1] < tabla[i + 1][j]) {
+            res = reconstruir(i, j - 1, palabra, tabla);
+            res.insert(i, 1, palabra[i]);
+        } else {
+            res = reconstruir(i + 1, j, palabra, tabla);
+            res.insert(j + 1 + (tabla[i][j] - 1), 1, palabra[i]);
+            //Esto hace que las nuevas cadenas entren en orden, sino las invierte
+            //Básicamente le quita la longitud de lo ya introduciendo en ese bloque
+        }
     }
 
     return res;
