@@ -7,17 +7,19 @@
 #include "Matriz.h"
 using namespace std;
 
-
 //Si las letras coinciden nos movemos en diagonal (siguientes 2 letras)
 //Si no conciden nos quedamos con el mejor camino (Izq o Drc)
 int resolver_rec(int i, int j, string const& palabra, Matriz<int> & tabla) {
     int & res = tabla[i][j];
 
-    if(i < j) {
-        if (palabra[i] == palabra[j])
-            res = resolver_rec(i + 1, j - 1, palabra, tabla);
-        else
-            res = min(resolver_rec(i, j - 1, palabra, tabla), resolver_rec(i + 1, j, palabra, tabla)) + 1;
+    if(res == -1) {
+        if (i >= j) res = 0;
+        else {
+            if (palabra[i] == palabra[j])
+                res = resolver_rec(i + 1, j - 1, palabra, tabla);
+            else
+                res = min(resolver_rec(i, j - 1, palabra, tabla), resolver_rec(i + 1, j, palabra, tabla)) + 1;
+        }
     }
     return res;
 }
@@ -53,7 +55,7 @@ bool resuelveCaso() {
     if (!cin) return false;
 
     int n = p.length();
-    Matriz<int> tabla(n, n, 0);
+    Matriz<int> tabla(n, n, -1);
 
     cout << resolver_rec(0, n-1, p, tabla) << " ";
     cout << reconstruir(0, n-1, p, tabla) << endl;
