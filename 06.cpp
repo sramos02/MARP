@@ -1,4 +1,5 @@
 //Sergio Ramos Mesa
+//Insert es muy ineficiente. Se podría mejorar la solución quitandolo
 
 #include <iostream>
 #include <fstream>
