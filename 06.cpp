@@ -75,3 +75,37 @@ int main() {
 
     return 0;
 }
+
+
+
+
+/*
+//Cuando los iteradores se cruzan para
+//Si no, escribe la letra al principio, llama a reursión y luego la vuelve a escribir
+string reconstruir(int i, int j, string const& palabra, Matriz<int> const& tabla){
+    string res;
+
+    //Caso base
+    if(i == j) res = palabra[i];
+    else if (i > j) res = "";
+    else {
+        if (palabra[i] == palabra[j]) {
+            res.push_back(palabra[j]);
+            res.insert(res.length(), reconstruir(i + 1, j - 1, palabra, tabla));
+            res.push_back(palabra[j]);
+        }
+        else if (tabla[i][j - 1] < tabla[i + 1][j]) {
+            res.insert(0, 1, palabra[j]);
+            res.insert(res.length(), reconstruir(i, j - 1, palabra, tabla));
+            res.insert(res.length(), 1, palabra[j]);
+        }
+        else {
+            res.insert(0, 1, palabra[i]);
+            res.insert(res.length(), reconstruir(i + 1, j, palabra, tabla));
+            res.insert(res.length(), 1, palabra[i]);
+        }
+    }
+
+    return res;
+}
+*/
