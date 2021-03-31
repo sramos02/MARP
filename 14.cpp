@@ -10,21 +10,37 @@
 using namespace std;
 
 struct tNodo {
-    //ToDo tiempoEstimado
     EntInf tiempo;
-    EntInf prioridad;
+    EntInf prioridad; //tiempo estimado
     int profundidad; //trabajador actual
-
     vector<bool> marcas;
 
-    bool operator<(tNodo const &otro) const { //CoMparador de prioridades
+    bool operator<(tNodo const &otro) const { //Comparador de prioridades
         return otro.prioridad < prioridad;
     }
 };
 
+
+//Parece una tontería pero se ve bonito, para entender mejor
+void calculaEstimado(vector<EntInf> & estim, Matriz<int> const& tiempos){
+    int n = tiempos.numfils();
+    for(int i = n - 1; i >= 0; i--) {
+        EntInf min = Infinito;
+        for(int j = 0; j < n; j++) {
+            if(EntInf(tiempos[i][j]) < min)
+                min = tiempos[i][j];
+        }
+
+        if(i != n-1) estim[i] = min + estim[i+1];
+        else estim[i] = min;
+    }
+}
+
 //No se puede hacer recursivo, por ramificación y poda
 EntInf laMochilita(Matriz<int> const& tiempos, int n){
     EntInf mejorTiempo = Infinito;
+    vector<EntInf> estim(n);
+    calculaEstimado(estim, tiempos);
 
     //Creamos la cola y creamos la raiz
     priority_queue<tNodo> cola = priority_queue<tNodo>();
@@ -49,17 +65,21 @@ EntInf laMochilita(Matriz<int> const& tiempos, int n){
             hijo.profundidad += 1; //el nodo que estás calculando
             int i = hijo.profundidad;
 
-
             //Posible solución
-            if (act.tiempo + tiempos[i][j] < mejorTiempo && !act.marcas[j]){ //la tarea debe estar disponible y ser mejor
+            if (!act.marcas[j]){ //la tarea debe estar disponible y ser mejor
                 hijo.marcas[j] = true; //el número que estamos cogiendo
                 hijo.tiempo = hijo.tiempo + tiempos[i][j];
-                hijo.prioridad = hijo.tiempo;
 
-                //Si es solución, final de una rama
-                if(hijo.profundidad == n-1)
-                    mejorTiempo = hijo.tiempo;
-                else cola.push(hijo);
+                //Esto es importante, no funcionaba sin el if, else
+                if(i != n-1) hijo.prioridad = hijo.tiempo + estim[i+1];
+                else hijo.prioridad = hijo.tiempo;
+
+                if(hijo.prioridad < mejorTiempo) {
+                    //Si es solución, final de una rama
+                    if (hijo.profundidad == n - 1)
+                        mejorTiempo = hijo.tiempo;
+                    else cola.push(hijo);
+                }
             }
         }
     }
@@ -78,7 +98,6 @@ bool resuelveCaso() {
             cin >> tiempos[i][j];
     }
 
-    EntInf tiempo = Infinito;
     cout << laMochilita(tiempos, n) << endl;
     return true;
 }
