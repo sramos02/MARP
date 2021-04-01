@@ -2,46 +2,43 @@
 
 #include <iostream>
 #include <fstream>
+#include <time.h>
+#include <sstream>
 
 #include "EnterosInf.h"
 #include "Matriz.h"
 using namespace std;
 
 typedef struct{
-    string horaIni;
+    int iniTime; //convertido a segunos
     int duracion;
 }tDatos;
 
-int lasPeliculas(int n, vector<tDatos> datos){
-    vector<int> parrafo(n);
 
-    //Casos básicos
-    int i = n-1;
-    int suma = datos[i].horaIni + datos[i].duracion + 10; //Como hago esto?
+int convierteSegundos(int hh, int mm){
+    return hh*3600 + mm*60;
+}
 
-    while (i >= 0 && ((n-1)-i) + suma <= L) {
-        parrafo[i] = 0;
-        --i;
-        suma += l[i];
-    }
+int horaFin(tDatos dato){
+    return dato.iniTime + (dato.duracion + 10)*60;
+}
 
-    // casos recursivos
-    while (i >= 0) {
-        int j = i;
-        suma = l[i];
-        parrafo[i] = INF;
+//devuelve el máximo de minutos que se está viendo una película al
+//considerar las pelis desde 1 a i que podemos ver antes de la hora j
+int pelis(int n, vector<tDatos> const& datos){
+    int max = 0;
 
-        while (j < n-1 && (j-i) + suma <= L) {
-            int pen = L - (j-i) - suma;
-            int nuevo = pen*pen*pen + parrafo[j+1];
+    for(int i = 0; i < datos.size()-1; i++) {
+        int aux = 0, j = i;
+        bool fin = false;
 
-            if (nuevo < parrafo[i]) parrafo[i] = nuevo;
-            ++j;
-            suma += l[j];
+        while ((j < datos.size()) && !fin){
+            (horaFin(datos[j]) < datos[j + 1].iniTime) ? (aux += datos[j].duracion) : fin; //Tienen que estar encadenadas
+            j++;
         }
-        --i;
+        if(j == datos.size()-1) aux += datos[datos.size()-1].duracion;
     }
-    return parrafo[0];
+    return max;
 }
 
 bool resuelveCaso() {
@@ -53,11 +50,21 @@ bool resuelveCaso() {
 
     for (int i = 0; i < n; i++) {
         tDatos nuevo;
-        cin >> nuevo.horaIni >> nuevo.duracion;
+        string dato;
+
+        cin >> dato >> nuevo.duracion;
+
+        stringstream hora; hora << dato[0]; hora << dato[1]; //Preparo las horas
+        stringstream min; min << dato[3]; min << dato[4];
+
+        int intHora, intMin;
+        hora >> intHora; min >> intMin;
+        nuevo.iniTime = convierteSegundos(intHora, intMin);
+
         cartelera.push_back(nuevo);
     }
 
-    cout << lasPeliculas(n, cartelera) << endl;
+    cout << pelis(n, cartelera) << endl;
     return true;
 }
 
