@@ -25,7 +25,7 @@ int horaFin(tDatos dato){
 
 //devuelve el máximo de minutos que se está viendo una película al
 //considerar las pelis desde 1 a i que podemos ver antes de la hora j
-int pelis(int n, vector<tDatos> const& datos){
+int pelis(vector<tDatos> const& datos){
     int max = 0;
 
     for(int i = 0; i < datos.size()-1; i++) {
@@ -54,17 +54,16 @@ bool resuelveCaso() {
 
         cin >> dato >> nuevo.duracion;
 
-        stringstream hora; hora << dato[0]; hora << dato[1]; //Preparo las horas
-        stringstream min; min << dato[3]; min << dato[4];
-
         int intHora, intMin;
+        stringstream hora; hora << dato[0]; hora << dato[1]; //Preparo las horas y las convierto a int
+        stringstream min; min << dato[3]; min << dato[4];
         hora >> intHora; min >> intMin;
+        
         nuevo.iniTime = convierteSegundos(intHora, intMin);
-
         cartelera.push_back(nuevo);
     }
 
-    cout << pelis(n, cartelera) << endl;
+    cout << pelis(cartelera) << endl;
     return true;
 }
 
