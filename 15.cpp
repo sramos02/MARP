@@ -1,4 +1,7 @@
+//Ejercicio 15
 //Sergio Ramos Mesa
+//María Esther Ruiz-Capillas Muñoz
+//Germán Castaño Rolsán
 
 #include <iostream>
 #include <fstream>
@@ -12,10 +15,11 @@ struct tNodo {
     int calidad;
     int prioridad; //calidad estimada
     int profundidad; //carro actual
-    vector<bool> marcas;
+    vector<bool> marcasCaminos;
+    //vector<bool> marcasCarros;
 
     bool operator<(tNodo const &otro) const { //Comparador de prioridades
-        return otro.prioridad < prioridad;
+        return otro.prioridad > prioridad;
     }
 };
 
@@ -38,40 +42,45 @@ int lasQuitanieves(vector<int> const& carros, vector<int> const& caminos, Matriz
     int m = caminos.size(); //caminos
     int mejorCalidad = -1;
 
-    vector<int> estim(n);
-    calculaEstimado(n, m, calidades, estim);
+    if(n != 0) {
+        vector<int> estim(n);
+        calculaEstimado(n, m, calidades, estim);
 
-    //Inicializamos la cola de prioridad
-    priority_queue<tNodo> cola = priority_queue<tNodo>();
-    tNodo act;
-    act.marcas = vector<bool>(m, false);
-    act.calidad = 0;
-    act.prioridad = 0;
-    act.profundidad = -1;
-    cola.push(act);
+        //Inicializamos la cola de prioridad
+        priority_queue<tNodo> cola = priority_queue<tNodo>();
+        tNodo act;
+        //act.marcasCarros = vector<bool>(n, false);
+        act.marcasCaminos = vector<bool>(m, false);
+        act.calidad = 0;
+        act.prioridad = 0;
+        act.profundidad = -1;
+        cola.push(act);
 
-    while (!cola.empty() && cola.top().calidad > mejorCalidad) { //Para todos los carros
-        act = cola.top();
-        cola.pop();
+        while (!cola.empty() && cola.top().prioridad > mejorCalidad) {
+            act = cola.top();
+            cola.pop();
 
-        for (int j = 0; j < m; j++) { //recorre los caminos
-            tNodo hijo(act);
-            hijo.profundidad += 1;
-            int i = hijo.profundidad;
+            for (int j = 0; j < m; j++) { //recorre los caminos
+                tNodo hijo(act);
+                hijo.profundidad += 1;
+                int i = hijo.profundidad;
 
-            //Posible solución
-            if (!act.marcas[j] && (carros[i] <= caminos[j])) {
-                hijo.marcas[j] = true;
-                hijo.calidad = hijo.calidad + calidades[i][j];
+                //Posible solución
+                if (!act.marcasCaminos[j] && (carros[i] <= caminos[j])) {//!act.marcasCarros[i] &&
+                    //hijo.marcasCarros[i] = true;
+                    hijo.marcasCaminos[j] = true;
 
-                if (i < n) hijo.prioridad = hijo.calidad + estim[i + 1];
-                else hijo.prioridad = hijo.calidad;
+                    hijo.calidad = hijo.calidad + calidades[i][j];
 
-                //Mejor solución (valor debe ser máximo y llgar al final)
-                if (hijo.prioridad > mejorCalidad) {
-                    if (hijo.profundidad == n - 1)
-                        mejorCalidad = hijo.calidad;
-                    else cola.push(hijo);
+                    hijo.prioridad = hijo.calidad;
+                    if (i < n - 1) hijo.prioridad += estim[i + 1];
+
+                    //Mejor solución (valor debe ser máximo y llgar al final)
+                    if (hijo.prioridad > mejorCalidad) {
+                        if (hijo.profundidad == n - 1)
+                            mejorCalidad = hijo.calidad;
+                        else cola.push(hijo);
+                    }
                 }
             }
         }
@@ -110,7 +119,7 @@ bool resuelveCaso() {
 
 int main() {
 #ifndef DOMJUDGE
-    ifstream in("casos.txt");
+    ifstream in("casosQuitanieves.txt");
     auto cinbuf = cin.rdbuf(in.rdbuf());
 #endif
 
