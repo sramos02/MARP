@@ -9,6 +9,7 @@
 #include <queue>
 #include <vector>
 #include "Matriz.h"
+#include <climits>
 using namespace std;
 
 struct tNodo {
@@ -16,7 +17,6 @@ struct tNodo {
     int prioridad; //calidad estimada
     int profundidad; //carro actual
     vector<bool> marcasCaminos;
-    //vector<bool> marcasCarros;
 
     bool operator<(tNodo const &otro) const { //Comparador de prioridades
         return otro.prioridad > prioridad;
@@ -49,7 +49,6 @@ int lasQuitanieves(vector<int> const& carros, vector<int> const& caminos, Matriz
         //Inicializamos la cola de prioridad
         priority_queue<tNodo> cola = priority_queue<tNodo>();
         tNodo act;
-        //act.marcasCarros = vector<bool>(n, false);
         act.marcasCaminos = vector<bool>(m, false);
         act.calidad = 0;
         act.prioridad = 0;
@@ -60,23 +59,35 @@ int lasQuitanieves(vector<int> const& carros, vector<int> const& caminos, Matriz
             act = cola.top();
             cola.pop();
 
-            for (int j = 0; j < m; j++) { //recorre los caminos
+            tNodo hijo(act);
+            hijo.profundidad++;
+            int i = hijo.profundidad;
+            hijo.prioridad = hijo.calidad;
+            if (i < n - 1)
+                hijo.prioridad += estim[i + 1];
+
+            if (hijo.prioridad > mejorCalidad){
+                if (hijo.profundidad == n - 1){
+                    if (hijo.calidad > mejorCalidad)
+                        mejorCalidad = hijo.calidad;
+                }
+                else cola.push(hijo);
+            }
+
+            for (int j = 0; j < m; j++) { //camino al que mandar el carro
                 tNodo hijo(act);
-                hijo.profundidad += 1;
-                int i = hijo.profundidad;
+                hijo.profundidad++;
 
                 //Posible solución
-                if (!act.marcasCaminos[j] && (carros[i] <= caminos[j])) {//!act.marcasCarros[i] &&
-                    //hijo.marcasCarros[i] = true;
+                if (!act.marcasCaminos[j] && (carros[i] <= caminos[j])) {
                     hijo.marcasCaminos[j] = true;
-
                     hijo.calidad = hijo.calidad + calidades[i][j];
 
                     hijo.prioridad = hijo.calidad;
                     if (i < n - 1) hijo.prioridad += estim[i + 1];
 
                     //Mejor solución (valor debe ser máximo y llgar al final)
-                    if (hijo.prioridad > mejorCalidad) {
+                    if (hijo.prioridad > mejorCalidad) {//if (hijo.calidad > mejorCalidad)
                         if (hijo.profundidad == n - 1)
                             mejorCalidad = hijo.calidad;
                         else cola.push(hijo);
@@ -116,7 +127,6 @@ bool resuelveCaso() {
     cout << ret << endl;
     return true;
 }
-
 int main() {
 #ifndef DOMJUDGE
     ifstream in("casosQuitanieves.txt");
